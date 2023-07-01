@@ -41,11 +41,25 @@ chrome.storage.sync.get({
 
 function tabWithoutSelecting(tab) {
 	var shouldNotFocus = null;
+
+	if (ignoredPageArray == null || ignoredPageArray.length == 0) {
+		console.log("tabsInFrontRegex|tabWithoutSelecting: on option page it seems there is no page listed to ignore -> this tab must be in front then");
+
+		selectTab(tab, shouldNotFocus);
+
+		return;
+	}
 	
 	for (let i = 0; i < ignoredPageArray.length; i++) {
 		var currentPageRegexpToIgnore = ignoredPageArray[i];
 		
-		console.log("XXXXXXXXXXXX: " + currentPageRegexpToIgnore);
+		console.log("tabsInFrontRegex|tabWithoutSelecting - currentPageRegexpToIgnore: " + currentPageRegexpToIgnore);
+
+		if (currentPageRegexpToIgnore == null || currentPageRegexpToIgnore.length == 0) {
+			console.log("tabsInFrontRegex|tabWithoutSelecting - currentPageRegexpToIgnore was null or empty, focusing on the tab then");
+
+			selectTab(tab, shouldNotFocus);
+		}
 		
 		if (tab.pendingUrl.match(currentPageRegexpToIgnore) != null) {
 			shouldNotFocus = "true";
@@ -56,7 +70,11 @@ function tabWithoutSelecting(tab) {
 		shouldNotFocus = null;
 	} // for loop
 	
-	if (shouldNotFocus == null) {
+	selectTab(tab, shouldNotFocus)
+}
+
+function selectTab(tab, shouldNotFocus) {
+		if (shouldNotFocus == null) {
 		chrome.tabs.update(tab.id, {
 			selected: true
 			// highlighted: true
